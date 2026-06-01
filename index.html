@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тест на совместимость</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:-apple-system,"Helvetica Neue","Segoe UI",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; background:#FBFAF7; color:#1c1c22; line-height:1.45;
+  }
+  .wrap { max-width:760px; margin:0 auto; padding:28px 18px 80px; }
+
+  header { text-align:center; margin:10px 0 6px; }
+  header h1 { font-size:32px; font-weight:800; letter-spacing:.3px; }
+  header p { margin-top:12px; color:#5b5b66; font-size:17px; }
+
+  .card-intro { background:#fff; border:2px solid #ededea; border-radius:18px; padding:26px 22px; margin-top:24px; }
+  .card-intro ul { margin:14px 0 0; padding-left:20px; color:#54545e; font-size:15.5px; }
+  .card-intro li { margin:7px 0; }
+  .name-row { margin:20px 0 0; }
+  .name-row input {
+    width:100%; padding:14px 16px; font-size:16px; border:2px solid #e2e0da;
+    border-radius:12px; background:#fafaf7; outline:none; font-family:inherit;
+  }
+  .name-row input:focus { border-color:#0A0E27; }
+
+  .progress { position:sticky; top:0; z-index:20; background:#FBFAF7; padding:12px 0 10px; margin-bottom:6px; }
+  .progress .bar { height:10px; background:#eceae3; border-radius:99px; overflow:hidden; }
+  .progress .fill { height:100%; width:0; background:#0A0E27; transition:width .25s ease; }
+  .progress .txt { font-size:14px; color:#5b5b66; margin-top:7px; font-weight:600; }
+
+  .q { background:#fff; border:2px solid #ededea; border-radius:16px; padding:20px 18px 16px; margin-bottom:14px; transition:border-color .2s; }
+  .q.miss { border-color:#E8483C; box-shadow:0 0 0 3px rgba(232,72,60,.12); }
+  .qnum { font-size:13px; font-weight:800; color:#a9a7a0; letter-spacing:.5px; margin-bottom:6px; }
+  .qtext { font-size:17.5px; font-weight:700; margin-bottom:14px; }
+  .choice {
+    display:block; width:100%; text-align:left; cursor:pointer; user-select:none;
+    border:2px solid #e7e5de; background:#fafaf7; border-radius:12px;
+    padding:12px 15px; margin-bottom:9px; font-size:15.5px; font-weight:500; color:#33333a;
+    transition:all .12s; font-family:inherit; line-height:1.35;
+  }
+  .choice:hover { border-color:#bdbbb2; }
+  .choice.sel { background:#0A0E27; color:#fff; border-color:transparent; }
+
+  .cta {
+    display:block; width:100%; margin:26px 0 0; padding:18px;
+    font-size:19px; font-weight:800; color:#fff; background:#0A0E27;
+    border:none; border-radius:14px; cursor:pointer; font-family:inherit;
+    box-shadow:0 8px 22px rgba(10,14,39,.25);
+  }
+  .cta:hover { background:#161b3d; }
+  .cta.ghost { background:#fff; color:#0A0E27; border:2px solid #0A0E27; box-shadow:none; }
+
+  /* thanks (his screen) */
+  .thanks { text-align:center; background:#fff; border:2px solid #ededea; border-radius:20px; padding:36px 24px; margin-top:24px; }
+  .thanks .em { font-size:60px; }
+  .thanks h2 { font-size:26px; font-weight:800; margin:10px 0 8px; }
+  .thanks p { color:#54545e; font-size:16px; max-width:480px; margin:0 auto 18px; }
+  .linkbox { display:flex; gap:8px; margin-top:8px; }
+  .linkbox input { flex:1; min-width:0; padding:12px 14px; font-size:14px; border:2px solid #e2e0da; border-radius:11px; background:#fafaf7; color:#54545e; font-family:inherit; }
+  .copybtn { padding:12px 18px; font-size:15px; font-weight:800; color:#fff; background:#0A0E27; border:none; border-radius:11px; cursor:pointer; white-space:nowrap; font-family:inherit; }
+
+  /* result (her screen) */
+  .meta { text-align:center; color:#8a8a92; font-size:14px; margin:6px 0 14px; }
+  .verdict { text-align:center; background:#0A0E27; color:#fff; border-radius:20px; padding:30px 22px; margin-bottom:8px; }
+  .verdict .who { font-size:15px; color:#9aa0c8; margin-bottom:8px; }
+  .verdict .big { font-size:64px; font-weight:800; line-height:1; }
+  .verdict .big span { font-size:26px; color:#7FD0FF; }
+  .verdict .title { font-size:24px; font-weight:800; margin:12px 0 6px; }
+  .verdict .sub { font-size:16px; color:#c9cce6; max-width:540px; margin:0 auto; }
+  .rcard { background:#fff; border:2px solid #ededea; border-radius:14px; padding:15px 17px; margin-top:12px; }
+  .rcard .top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .rcard .nm { font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px; }
+  .rcard .sc { font-size:22px; font-weight:800; white-space:nowrap; }
+  .rcard .sc b { font-size:14px; color:#8a8a92; font-weight:700; }
+  .rcard .track { height:12px; background:#f0eee7; border-radius:99px; overflow:hidden; margin:11px 0 8px; }
+  .rcard .tfill { height:100%; width:0; border-radius:99px; transition:width .6s ease; }
+  .rcard .vd { font-size:14.5px; font-weight:600; color:#54545e; }
+  .summary { background:#fff; border:2px solid #ededea; border-radius:14px; padding:16px 18px; margin-top:16px; font-size:15.5px; }
+  .summary .row { margin:6px 0; }
+  .summary .tag { font-weight:800; }
+
+  .note { text-align:center; color:#9a9aa2; font-size:13px; margin-top:26px; }
+  .hidden { display:none !important; }
+
+  @media (max-width:560px){
+    header h1{font-size:25px;}
+    .verdict .big{font-size:52px;}
+  }
+  @media print { .progress,.cta,.note,.copybtn{display:none!important;} body{background:#fff;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== INTRO (его) ===================== -->
+  <div id="intro">
+    <header>
+      <h1>Тест на совместимость</h1>
+      <p>Этот тест прислал тебе близкий человек. Здесь нет правильных и неправильных ответов, отвечай честно, как есть на самом деле.</p>
+    </header>
+    <div class="card-intro">
+      <ul>
+        <li>24 коротких вопроса с жизненными ситуациями</li>
+        <li>Примерно 5 минут</li>
+        <li>В конце ты получишь ссылку, которую нужно отправить обратно тому, кто прислал тебе тест</li>
+      </ul>
+      <div class="name-row"><input id="hisname" type="text" placeholder="Как тебя зовут?"></div>
+      <button class="cta" id="startBtn" style="margin-top:18px;">Начать тест</button>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ (его) ===================== -->
+  <div id="quiz" class="hidden">
+    <div class="progress">
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="txt" id="ptxt">Отвечено 0 из 24</div>
+    </div>
+    <div id="questions"></div>
+    <button class="cta" id="finishBtn">Завершить и получить ссылку</button>
+  </div>
+
+  <!-- ===================== THANKS (его) ===================== -->
+  <div id="thanks" class="hidden">
+    <div class="thanks">
+      <div class="em">✅</div>
+      <h2>Готово, спасибо!</h2>
+      <p>Твои ответы записаны. Скопируй ссылку ниже и отправь её обратно тому, кто прислал тебе этот тест. Результат увидит только этот человек.</p>
+      <div class="linkbox">
+        <input id="resultLink" type="text" readonly>
+        <button class="copybtn" id="copyBtn">Скопировать</button>
+      </div>
+      <p id="copied" style="color:#1E9E6A;font-weight:700;margin-top:12px;display:none;">Ссылка скопирована, теперь отправь её в Telegram или WhatsApp</p>
+    </div>
+  </div>
+
+  <!-- ===================== RESULT (её) ===================== -->
+  <div id="result" class="hidden">
+    <header><h1>Результат теста</h1></header>
+    <div class="meta" id="rmeta"></div>
+    <div class="verdict">
+      <div class="who" id="rwho"></div>
+      <div class="big" id="rbig"></div>
+      <div class="title" id="rtitle"></div>
+      <div class="sub" id="rsub"></div>
+    </div>
+    <div id="rcards"></div>
+    <div class="summary" id="rsummary"></div>
+    <button class="cta ghost" onclick="window.print()" style="margin-top:22px;">Сохранить результат (печать / PDF)</button>
+  </div>
+
+  <div class="note">Тест-ориентир по 8 личным критериям. Это повод подумать, а не приговор.</div>
+</div>
+
+<script>
+// ----- ветки (для результата, видит только она) -----
+const BRANCHES = [
+  { emoji:"🛡️", title:"Характер и внутренний стержень", dark:"#1E9E6A", on:"#fff" },
+  { emoji:"🧠", title:"Понимание моей природы",          dark:"#0E9AA7", on:"#fff" },
+  { emoji:"🔥", title:"Страсть и притяжение",            dark:"#E5396B", on:"#fff" },
+  { emoji:"🏡", title:"Партнёрство и быт",               dark:"#C2683E", on:"#fff" },
+  { emoji:"✨", title:"Успех и обеспеченность",          dark:"#E8483C", on:"#fff" },
+  { emoji:"👑", title:"Мужественность и лидерство",      dark:"#2D6CDF", on:"#fff" },
+  { emoji:"🎁", title:"Забота, нежность и плюшки",       dark:"#E8893C", on:"#fff" },
+  { emoji:"🌱", title:"Духовность и развитие",           dark:"#E6B800", on:"#fff" }
+];
+
+// ----- вопросы-ситуации. b = индекс ветки. opts: {t текст, s балл 0..10} -----
+const QUESTIONS = [
+  // 0 Характер
+  { b:0, q:"Она на эмоциях наговорила тебе резких слов, о которых явно потом пожалеет. Твоя реакция?", opts:[
+    {t:"Спокойно дам ей выпустить пар, вернёмся к разговору, когда она остынет", s:10},
+    {t:"Отвечу тем же, чтобы почувствовала, каково это", s:0},
+    {t:"Замолчу и обижусь на пару дней", s:3},
+    {t:"Скажу, что мне неприятно, но без драмы, и переключусь", s:7} ]},
+  { b:0, q:"Друзья при тебе беззлобно подшутили над тобой. Что внутри?", opts:[
+    {t:"Посмеюсь вместе с ними, меня это не задевает", s:10},
+    {t:"Улыбнусь, но потом весь вечер прокручиваю это в голове", s:4},
+    {t:"Резко осажу, чтобы неповадно было", s:3},
+    {t:"Зависит от шутки, но обычно мне нормально", s:7} ]},
+  { b:0, q:"Ты пообещал, но обстоятельства изменились и держать слово стало неудобно. Как поступишь?", opts:[
+    {t:"Сделаю, как обещал, слово есть слово", s:10},
+    {t:"Сделаю, но потом припомню, чего мне это стоило", s:4},
+    {t:"Перенесу или отменю, ничего страшного", s:3},
+    {t:"Предупрежу заранее и предложу замену", s:7} ]},
+  // 1 Понимание природы
+  { b:1, q:"Она расплакалась, и ты не понимаешь причины. Что сделаешь первым?", opts:[
+    {t:"Обниму и побуду рядом, расспросы потом", s:10},
+    {t:"Начну выяснять, что случилось, и предлагать решения", s:5},
+    {t:"Дам ей побыть одной, чтобы успокоилась", s:3},
+    {t:"Растеряюсь и буду ждать, пока само пройдёт", s:1} ]},
+  { b:1, q:"У неё бывают перепады настроения без явной причины. Как ты это объясняешь?", opts:[
+    {t:"Это часть её природы, бывает, и я рядом", s:10},
+    {t:"Думаю, что я что-то сделал не так, и нервничаю", s:5},
+    {t:"Раздражаюсь, считаю это пустыми капризами", s:0},
+    {t:"Стараюсь отвлечь и развеселить её", s:7} ]},
+  { b:1, q:"Она хочет просто пожаловаться на свой день, а не получить совет. Ты:", opts:[
+    {t:"Слушаю и сочувствую, советы только если попросит", s:10},
+    {t:"Сразу даю решения, она же за этим и рассказывает", s:4},
+    {t:"Слушаю вполуха, это же просто болтовня", s:0},
+    {t:"Слушаю, поддерживаю, а совет аккуратно предложу", s:7} ]},
+  // 2 Страсть
+  { b:2, q:"Она проявляет инициативу в близости чаще, чем ты ожидал. Твоё отношение?", opts:[
+    {t:"Здорово, мне нравятся её желание и темперамент", s:10},
+    {t:"Приятно, хотя иногда удивляюсь её аппетиту", s:6},
+    {t:"Немного смущает, женщине не очень к лицу так явно", s:1},
+    {t:"Подстроюсь, но сам хочу реже", s:4} ]},
+  { b:2, q:"Что обычно происходит со страстью со временем в отношениях?", opts:[
+    {t:"Сознательно поддерживаю огонь: флирт, свидания, внимание", s:10},
+    {t:"Естественно угасает, это нормально", s:3},
+    {t:"Сохраняется сама собой, если люди подходят", s:6},
+    {t:"Честно, для меня это не главное в паре", s:1} ]},
+  { b:2, q:"Чем для тебя является секс в отношениях?", opts:[
+    {t:"Важная часть близости, и эмоциональной, и физической", s:10},
+    {t:"В основном физическая разрядка", s:4},
+    {t:"Приятно, но я спокойно могу подолгу без него", s:2},
+    {t:"Способ быть ближе и радовать любимую", s:8} ]},
+  // 3 Партнёрство и быт
+  { b:3, q:"Вы живёте вместе. Как у вас делится быт?", opts:[
+    {t:"Делаем вместе, без деления на мужское и женское", s:10},
+    {t:"В основном на ней, ведь я зарабатываю", s:3},
+    {t:"Помогаю, если попросит", s:5},
+    {t:"У каждого свои зоны, и свои я держу честно", s:8} ]},
+  { b:3, q:"У неё есть подруги и своё личное время. Ты:", opts:[
+    {t:"Рад, что у неё своя жизнь, и сам даю ей пространство", s:10},
+    {t:"Спокоен, но хочу знать, где и с кем она", s:5},
+    {t:"Меня это напрягает, хочу больше времени вместе", s:3},
+    {t:"Поддерживаю, у меня тоже есть свои дела", s:8} ]},
+  { b:3, q:"Серьёзный вопрос о будущем (дети, переезд). Как решаете?", opts:[
+    {t:"Обсуждаем открыто и приходим к общему решению", s:10},
+    {t:"Решаю я как мужчина, она поддержит", s:5},
+    {t:"Избегаю таких разговоров, само сложится", s:2},
+    {t:"Внимательно слушаю её, но последнее слово за мной", s:6} ]},
+  // 4 Успех и обеспеченность
+  { b:4, q:"Опиши свою финансовую ситуацию сейчас честно:", opts:[
+    {t:"Стабильный доход и есть подушка безопасности", s:10},
+    {t:"Доход есть, но живу без накоплений", s:5},
+    {t:"Бывает нестабильно, от месяца к месяцу", s:3},
+    {t:"Сейчас трудный период с деньгами", s:1} ]},
+  { b:4, q:"Твои цели и амбиции:", opts:[
+    {t:"Есть чёткие цели, и я постоянно расту в доходе", s:10},
+    {t:"Есть мечты, но конкретного плана пока нет", s:4},
+    {t:"Меня устраивает, как есть, особо не рвусь", s:2},
+    {t:"Развиваюсь шаг за шагом, без спешки, но стабильно", s:7} ]},
+  { b:4, q:"У твоей женщины есть желания и хотелки. Это для тебя:", opts:[
+    {t:"В радость их исполнять, и я могу себе это позволить", s:10},
+    {t:"Исполняю по возможности, в рамках бюджета", s:6},
+    {t:"Считаю, что она и сама в состоянии себе позволить", s:3},
+    {t:"Не люблю траты на хотелки, это баловство", s:1} ]},
+  // 5 Мужественность и лидерство
+  { b:5, q:"Сложная ситуация, где надо быстро принять решение. Ты обычно:", opts:[
+    {t:"Беру ответственность и решаю, при этом успокаивая остальных", s:10},
+    {t:"Советуюсь, но решение беру на себя", s:8},
+    {t:"Жду, пока ситуация разрешится сама", s:2},
+    {t:"Перекладываю решение на других", s:1} ]},
+  { b:5, q:"Кто-то повёл себя неуважительно с твоей женщиной при тебе. Ты:", opts:[
+    {t:"Спокойно, но твёрдо ставлю человека на место", s:10},
+    {t:"Делаю вид, что не заметил, чтобы не нагнетать", s:2},
+    {t:"Реагирую резко и агрессивно", s:5},
+    {t:"Защищаю её и спокойно увожу из ситуации", s:8} ]},
+  { b:5, q:"Она просит то, что тебе кажется неправильным. Твои действия:", opts:[
+    {t:"Спокойно объясняю позицию и могу сказать твёрдое нет", s:10},
+    {t:"Соглашаюсь, лишь бы не спорить", s:3},
+    {t:"Делаю по-своему, ничего не объясняя", s:4},
+    {t:"Обсуждаем и ищем компромисс", s:8} ]},
+  // 6 Забота, нежность, плюшки
+  { b:6, q:"Обычный день без всякого повода. Ты можешь:", opts:[
+    {t:"Сделать ей сюрприз или сказать комплимент просто так", s:10},
+    {t:"Поздравить и порадовать в основном по праздникам", s:4},
+    {t:"Считаю, что отношения не про сюрпризы", s:2},
+    {t:"Часто говорю тёплые слова и обнимаю", s:9} ]},
+  { b:6, q:"Насколько ты тактильный человек?", opts:[
+    {t:"Постоянно обнимаю и прикасаюсь, не только ради близости", s:10},
+    {t:"Обнимаю в основном перед близостью", s:4},
+    {t:"Не очень люблю телячьи нежности", s:2},
+    {t:"Для меня прикосновения это про любовь, мне это важно", s:9} ]},
+  { b:6, q:"Помнишь ли ты её мелочи (любимый цветок, что говорила вчера)?", opts:[
+    {t:"Да, запоминаю и использую, чтобы её радовать", s:10},
+    {t:"Что-то помню, что-то забываю", s:5},
+    {t:"Честно, плохо запоминаю такие детали", s:2},
+    {t:"Стараюсь держать важное в голове, чтобы не забыть", s:8} ]},
+  // 7 Духовность и развитие
+  { b:7, q:"Твоё отношение к саморазвитию:", opts:[
+    {t:"Постоянно учусь и расту, и вдохновляю на это любимую", s:10},
+    {t:"Развиваюсь время от времени", s:5},
+    {t:"Мне и так хорошо, не вижу особого смысла", s:2},
+    {t:"Много читаю и люблю глубокие разговоры", s:9} ]},
+  { b:7, q:"Она в чём-то сильно отличается от тебя по взглядам. Ты:", opts:[
+    {t:"Принимаю и уважаю её взгляды, мне даже интересно", s:10},
+    {t:"Терплю, но считаю свой взгляд правильным", s:4},
+    {t:"Пытаюсь переубедить её", s:3},
+    {t:"С интересом обсуждаю различия без осуждения", s:9} ]},
+  { b:7, q:"Твои главные ценности (семья, дети, образ жизни):", opts:[
+    {t:"Есть чёткие ценности, и я ищу совпадение с партнёршей", s:10},
+    {t:"Пока серьёзно об этом не задумывался", s:3},
+    {t:"Ценности есть, но готов подстроиться под партнёршу", s:6},
+    {t:"Семья и близкие для меня в приоритете", s:9} ]}
+];
+
+// ---------- helpers ----------
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function show(id){ document.getElementById(id).classList.remove('hidden'); }
+function hide(id){ document.getElementById(id).classList.add('hidden'); }
+
+const answers = new Array(QUESTIONS.length).fill(null); // answers[origIndex] = score
+let order = [];      // display order of original indices
+let optOrder = {};   // origIndex -> shuffled option indices
+
+// ---------- result mode (её) ----------
+function tryResultMode(){
+  const p = new URLSearchParams(location.search).get('r');
+  if(!p) return false;
+  let data;
+  try { data = JSON.parse(decodeURIComponent(escape(atob(p)))); } catch(e){ return false; }
+  if(!data || !Array.isArray(data.scores)) return false;
+  renderResult(data);
+  hide('intro'); hide('quiz'); hide('thanks'); show('result');
+  return true;
+}
+
+// ---------- build quiz ----------
+function buildQuiz(){
+  order = shuffle(QUESTIONS.map((_,i)=>i));
+  const wrap = document.getElementById('questions');
+  wrap.innerHTML = '';
+  order.forEach((origIdx, pos)=>{
+    const Q = QUESTIONS[origIdx];
+    const oi = shuffle(Q.opts.map((_,k)=>k));
+    optOrder[origIdx] = oi;
+    let choices = '';
+    oi.forEach((k)=>{
+      choices += `<button class="choice" id="c_${origIdx}_${k}" onclick="choose(${origIdx},${k})">${Q.opts[k].t}</button>`;
+    });
+    wrap.insertAdjacentHTML('beforeend',
+      `<div class="q" id="q_${origIdx}"><div class="qnum">ВОПРОС ${pos+1} ИЗ ${QUESTIONS.length}</div><div class="qtext">${Q.q}</div>${choices}</div>`);
+  });
+}
+
+function choose(origIdx, k){
+  answers[origIdx] = QUESTIONS[origIdx].opts[k].s;
+  optOrder[origIdx].forEach(j=>{
+    document.getElementById(`c_${origIdx}_${j}`).classList.toggle('sel', j===k);
+  });
+  document.getElementById(`q_${origIdx}`).classList.remove('miss');
+  updateProgress();
+}
+
+function answeredCount(){ return answers.filter(v=>v!==null).length; }
+function updateProgress(){
+  const c = answeredCount();
+  document.getElementById('fill').style.width = (c/QUESTIONS.length*100)+'%';
+  document.getElementById('ptxt').textContent = `Отвечено ${c} из ${QUESTIONS.length}`;
+}
+
+// ---------- scoring ----------
+function computeScores(){
+  const scores = [];
+  for(let b=0;b<BRANCHES.length;b++){
+    const idxs = QUESTIONS.map((Q,i)=>Q.b===b?i:-1).filter(i=>i>=0);
+    const sum = idxs.reduce((a,i)=>a+answers[i],0);
+    scores.push(sum/idxs.length); // 0..10
+  }
+  return scores;
+}
+
+// ---------- finish (его) ----------
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  buildQuiz(); hide('intro'); show('quiz'); updateProgress();
+  window.scrollTo({top:0});
+});
+
+document.getElementById('finishBtn').addEventListener('click', ()=>{
+  let first=null;
+  order.forEach(origIdx=>{
+    if(answers[origIdx]===null){
+      document.getElementById(`q_${origIdx}`).classList.add('miss');
+      if(first===null) first=`q_${origIdx}`;
+    }
+  });
+  if(first){
+    document.getElementById('ptxt').textContent = `Ответь ещё на ${QUESTIONS.length-answeredCount()}, чтобы завершить`;
+    document.getElementById(first).scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  const name = (document.getElementById('hisname').value || '').trim();
+  const d = new Date();
+  const payload = { v:1, name, scores: computeScores().map(s=>Math.round(s*10)/10), date: d.toLocaleDateString('ru-RU') };
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const link = location.origin + location.pathname + '?r=' + code;
+  document.getElementById('resultLink').value = link;
+  hide('quiz'); show('thanks');
+  window.scrollTo({top:0});
+});
+
+document.getElementById('copyBtn').addEventListener('click', ()=>{
+  const inp = document.getElementById('resultLink');
+  inp.select(); inp.setSelectionRange(0,99999);
+  navigator.clipboard.writeText(inp.value).then(()=>{
+    document.getElementById('copied').style.display='block';
+  }).catch(()=>{ document.execCommand('copy'); document.getElementById('copied').style.display='block'; });
+});
+
+// ---------- result render (её) ----------
+function verdictForBranch(s){
+  if(s>=8.5) return {t:"Идеально совпадает", e:"💚"};
+  if(s>=7)   return {t:"Сильная сторона", e:"👍"};
+  if(s>=5)   return {t:"Средне, есть над чем подумать", e:"🟡"};
+  if(s>=3)   return {t:"Слабое место", e:"🟠"};
+  return {t:"Красный флаг", e:"🔴"};
+}
+function renderResult(data){
+  const scores = data.scores;
+  const overall = scores.reduce((a,v)=>a+v,0)/scores.length;
+  const who = data.name ? data.name : 'Он';
+  document.getElementById('rmeta').textContent = (data.name? data.name+' • ' : '') + 'пройдено ' + (data.date||'');
+  document.getElementById('rwho').textContent = `Насколько ${who} тебе подходит`;
+  document.getElementById('rbig').innerHTML = `${overall.toFixed(1)}<span> / 10</span>`;
+  let vt,vs;
+  if(overall>=8.5){ vt="Это прямо твой человек"; vs="Он совпадает почти по всем твоим ключевым осям. Такое встречается редко."; }
+  else if(overall>=7){ vt="Очень сильный кандидат"; vs="Он закрывает большинство важного. Посмотри на проседающие ветки и реши, критичны ли они."; }
+  else if(overall>=5.5){ vt="Неоднозначно"; vs="Есть и хорошее, и серьёзные пробелы. Смотри не на средний балл, а на то, какие именно ветки проседают."; }
+  else if(overall>=4){ vt="Скорее не твой"; vs="Слишком много важного для тебя не закрыто. Трезво оцени, что реально изменится, а что нет."; }
+  else { vt="Это не твой человек"; vs="По твоим же критериям он не совпадает почти ни в чём важном."; }
+  document.getElementById('rtitle').textContent = vt;
+  document.getElementById('rsub').textContent = vs;
+
+  let html='';
+  BRANCHES.forEach((b,i)=>{
+    const s=scores[i], vd=verdictForBranch(s);
+    html += `<div class="rcard">
+      <div class="top">
+        <div class="nm" style="color:${b.dark}">${b.emoji} ${b.title}</div>
+        <div class="sc" style="color:${b.dark}">${s.toFixed(1)}<b> /10</b></div>
+      </div>
+      <div class="track"><div class="tfill" style="width:${Math.max(0,Math.min(100,s*10))}%;background:${b.dark}"></div></div>
+      <div class="vd">${vd.e} ${vd.t}</div>
+    </div>`;
+  });
+  document.getElementById('rcards').innerHTML = html;
+
+  let maxI=0,minI=0;
+  scores.forEach((s,i)=>{ if(s>scores[maxI])maxI=i; if(s<scores[minI])minI=i; });
+  document.getElementById('rsummary').innerHTML = `
+    <div class="row"><span class="tag" style="color:${BRANCHES[maxI].dark}">Сильнее всего:</span> ${BRANCHES[maxI].emoji} ${BRANCHES[maxI].title} — ${scores[maxI].toFixed(1)}/10</div>
+    <div class="row"><span class="tag" style="color:${BRANCHES[minI].dark}">Слабее всего:</span> ${BRANCHES[minI].emoji} ${BRANCHES[minI].title} — ${scores[minI].toFixed(1)}/10</div>
+    <div class="row" style="margin-top:10px;color:#54545e">Один красный флаг в критичной для тебя ветке важнее, чем высокий средний балл.</div>`;
+}
+
+// ---------- init ----------
+if(!tryResultMode()){ show('intro'); }
+</script>
+</body>
+</html>
